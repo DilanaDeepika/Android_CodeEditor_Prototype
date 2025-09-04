@@ -1,13 +1,19 @@
 package com.example.codeeditor
 
-import androidx.compose.ui.platform.ClipboardManager
-
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun CompilerInterface(
@@ -15,25 +21,68 @@ fun CompilerInterface(
     compileOutput: String,
     onClose: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
+    val backgroundColor = MaterialTheme.colorScheme.surface
+    val textColor = MaterialTheme.colorScheme.onSurface
+
     AlertDialog(
         onDismissRequest = { onClose() },
         title = { Text("Compiler Result") },
-        text = { Text(compileOutput) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 100.dp, max = 300.dp)
+                    .background(backgroundColor)
+                    .verticalScroll(scrollState)
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        compileOutput.lines().forEach { line ->
+                            when {
+                                line.contains("error", ignoreCase = true) -> append(
+                                    AnnotatedString(line + "\n", SpanStyle(color = Color.Red))
+                                )
+                                line.contains("warning", ignoreCase = true) -> append(
+                                    AnnotatedString(line + "\n", SpanStyle(color = Color(0xFFFFA500))) // orange
+                                )
+                                else -> append(
+                                    AnnotatedString(line + "\n", SpanStyle(color = textColor))
+                                )
+                            }
+                        }
+                    },
+                    fontSize = 14.sp
+                )
+            }
+        },
         confirmButton = {
-            Row {
-                Button(onClick = {
-                    val pathOnly = compileOutput.substringAfter("Kotlin file saved at ").trim()
-                    if (pathOnly.isNotEmpty()) {
-                        clipboardManager.setText(AnnotatedString(pathOnly))
-                    }
-                }) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Button(
+                    onClick = {
+                        if (compileOutput.isNotEmpty()) {
+                            clipboardManager.setText(AnnotatedString(compileOutput))
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text("Copy")
                 }
 
-                Button(onClick = { onClose() }) {
+                Button(
+                    onClick = { onClose() },
+                    modifier = Modifier.weight(1f)
+                ) {
                     Text("OK")
                 }
             }
-        }
+        },
+        containerColor = backgroundColor
     )
 }

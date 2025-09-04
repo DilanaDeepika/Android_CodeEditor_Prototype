@@ -1,45 +1,69 @@
 package com.example.codeeditor
 
-import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-/**
- * MiniToolbar Composable
- *
- * A simple toolbar UI that provides buttons for text editing actions:
- * - Cut
- * - Copy
- * - Paste
- *
- * The actual behavior is passed in through the callbacks [onCut], [onCopy], and [onPaste].
- */
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.Color
+
+
 @Composable
 fun MiniToolbar(
     onCut: () -> Unit,
     onCopy: () -> Unit,
     onPaste: () -> Unit
 ) {
-    val editorState = remember { TextEditorState() }
-    Log.d("FileManager", "Mini tool bar")
-
-    Column(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.LightGray)
-            .padding(8.dp),
+            .height(56.dp)
+            .padding(horizontal = 8.dp)
+            .border(1.dp, Color.Gray, RoundedCornerShape(8.dp)),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 2.dp,
+        shadowElevation = 2.dp,
+        shape = RoundedCornerShape(8.dp)
     ) {
-        TextButton(onClick = onCut) { Text("Cut") }
-        TextButton(onClick = onCopy) { Text("Copy") }
-        TextButton(onClick = onPaste) { Text("Paste") }
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ProfessionalToolbarButton(icon = Icons.Default.ContentCut, label = "Cut", onClick = onCut)
+            ProfessionalToolbarButton(icon = Icons.Default.ContentCopy, label = "Copy", onClick = onCopy)
+            ProfessionalToolbarButton(icon = Icons.Default.ContentPaste, label = "Paste", onClick = onPaste)
+        }
+    }
+}
+
+@Composable
+fun ProfessionalToolbarButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .size(48.dp)
+            .padding(4.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = MaterialTheme.colorScheme.onSurface
+        )
     }
 }

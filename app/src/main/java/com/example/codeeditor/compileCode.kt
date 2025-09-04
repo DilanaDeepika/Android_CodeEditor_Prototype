@@ -1,48 +1,67 @@
-package com.example.codeeditor
+package com.example.codeeditor.network
 
 import android.content.Context
-import kotlinx.coroutines.CoroutineScope
+import com.example.codeeditor.FileManager
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 
-fun compileCode(
-    context: Context,
-    code: String,
-    fileManager: FileManager,
-    fileName: String,
-    onResult: (String) -> Unit
-) {
-    // 1. Save the Kotlin file internally
-    fileManager.saveFile(fileName, code)
-    val internalFile = File(context.filesDir, fileName)
-    val externalDir = context.getExternalFilesDir(null) // app-specific external folder
-    val externalFile = File(externalDir, fileName)
+data class CompileResponse(
+    val ok: Boolean,
+    val phase: String,
+    val stdout: String,
+    val stderr: String,
+    val exitCode: Int
+)
 
-    if (internalFile.exists()) {
-        internalFile.copyTo(externalFile, overwrite = true)
+class CompilerClient(private val context: Context) {
+
+    private val fileManager = FileManager(context)
+    // Change to your server endpoint
+    private val endpoint = "http://127.0.0.1:5000/compile"
+
+    private fun postOnce(urlStr: String, code: String): CompileResponse {
+        val conn = (URL(urlStr).openConnection() as HttpURLConnection)
+        return try {
+            conn.requestMethod = "POST"
+            conn.doOutput = true
+            conn.connectTimeout = 8000
+            conn.readTimeout = 15000
+            conn.setRequestProperty("Content-Type", "text/plain; charset=utf-8")
+            conn.setRequestProperty("Accept", "application/json")
+            conn.outputStream.use { it.write(code.toByteArray(Charsets.UTF_8)) }
+
+            val stream = if (conn.responseCode in 200..299) conn.inputStream
+            else (conn.errorStream ?: conn.inputStream)
+
+            val body = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
+            Gson().fromJson(body, CompileResponse::class.java)
+        } finally {
+            conn.disconnect()
+        }
     }
 
-    // 2. Show instructions via onResult
-    val instructions = "Kotlin file saved at $externalFile "
+    suspend fun compile(code: String): CompileResponse = withContext(Dispatchers.IO) {
+        try {
+            postOnce(endpoint, code)
+        } catch (e: Exception) {
+            CompileResponse(
+                ok = false,
+                phase = "client",
+                stdout = "",
+                stderr = "Failed to connect to $endpoint\n${e.message ?: "Unknown error"}\n\n" +
+                        "USB (real phone) steps:\n" +
+                        "1) Run: adb reverse tcp:5000 tcp:5000\n" +
+                        "2) Start your Flask server on your PC at 127.0.0.1:5000\n" +
+                        "3) Ensure INTERNET permission & cleartext HTTP are enabled.",
+                exitCode = -1
+            )
+        }
+    }
 
-//          On your PC, do the following manually:
-
-//        1. Push the file to the device:
-//            adb shell
-//            cd  $externalFile
-//            ls
-//            exit
-
-//        2. Push the file to the device:
-//           adb pull $externalFile C:/Users/Dilana/Desktop/dilana.kt
-//        3. Compile it using your script:
-//           ./compile_kotlin.sh /sdcard/$fileName
-
-
-
-
-    onResult(instructions)
+    fun saveCodeLocally(fileManager: FileManager, fileName: String, code: String) {
+        fileManager.saveFile(fileName, code)
+    }
 }
