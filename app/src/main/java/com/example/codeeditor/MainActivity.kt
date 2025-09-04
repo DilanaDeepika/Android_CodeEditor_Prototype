@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import com.example.codeeditor.ui.theme.CodeEditorTheme
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
     private val editorState = TextEditorState()
     private var currentFileName by mutableStateOf("Untitled.kt")
 
+    @OptIn(FlowPreview::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -141,7 +143,6 @@ class MainActivity : ComponentActivity() {
                                 editorState = editorState,
                                 showFindReplace = showFindReplace,
                                 onToggleFindReplace = { showFindReplace = it },
-                                context = context,
                                 currentFileName = currentFileName,
                                 fileManager = FileManager(context),
                                 onCompileOutput = { output ->

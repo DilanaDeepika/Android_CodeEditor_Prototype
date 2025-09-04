@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -21,7 +23,6 @@ fun ModernBottomBar(
     editorState: TextEditorState,
     showFindReplace: Boolean,
     onToggleFindReplace: (Boolean) -> Unit,
-    context: Context,
     currentFileName: String,
     fileManager: FileManager,
     onCompileOutput: (String) -> Unit
@@ -68,14 +69,14 @@ fun ModernBottomBar(
             ) {
                 // Undo
                 ModernIconButton(
-                    imageVector = Icons.Default.Undo,
+                    imageVector = Icons.AutoMirrored.Filled.Undo,
                     contentDescription = "Undo",
                     onClick = { editorState.undo() }
                 )
 
                 // Redo
                 ModernIconButton(
-                    imageVector = Icons.Default.Redo,
+                    imageVector = Icons.AutoMirrored.Filled.Redo,
                     contentDescription = "Redo",
                     onClick = { editorState.redo() }
                 )
@@ -92,7 +93,7 @@ fun ModernBottomBar(
                     imageVector = Icons.Default.AccountBox,
                     contentDescription = "Compile",
                     onClick = {
-                        val compiler = CompilerClient(context)
+                        val compiler = CompilerClient()
                         val code = editorState.textField.value.text
 
                         // Launch coroutine to compile

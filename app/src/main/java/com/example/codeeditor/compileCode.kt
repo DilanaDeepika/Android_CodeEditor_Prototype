@@ -1,6 +1,5 @@
 package com.example.codeeditor.network
 
-import android.content.Context
 import com.example.codeeditor.FileManager
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +15,7 @@ data class CompileResponse(
     val exitCode: Int
 )
 
-class CompilerClient(private val context: Context) {
+class CompilerClient() {
 
     // Change to your server endpoint
     private val endpoint = "http://127.0.0.1:5000/compile"
