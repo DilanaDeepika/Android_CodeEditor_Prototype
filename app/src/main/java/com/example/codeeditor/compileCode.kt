@@ -18,7 +18,6 @@ data class CompileResponse(
 
 class CompilerClient(private val context: Context) {
 
-    private val fileManager = FileManager(context)
     // Change to your server endpoint
     private val endpoint = "http://127.0.0.1:5000/compile"
 
