@@ -49,11 +49,7 @@ class CompilerClient() {
                 ok = false,
                 phase = "client",
                 stdout = "",
-                stderr = "Failed to connect to $endpoint\n${e.message ?: "Unknown error"}\n\n" +
-                        "USB (real phone) steps:\n" +
-                        "1) Run: adb reverse tcp:5000 tcp:5000\n" +
-                        "2) Start your Flask server on your PC at 127.0.0.1:5000\n" +
-                        "3) Ensure INTERNET permission & cleartext HTTP are enabled.",
+                stderr = "Failed to connect  $endpoint\n${e.message ?: "Unknown error"}\n\n",
                 exitCode = -1
             )
         }
